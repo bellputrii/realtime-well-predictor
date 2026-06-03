@@ -5,3 +5,6 @@ numpy
 scikit-learn
 joblib
 pydantic
+sqlalchemy
+pymysql
+python-dotenv

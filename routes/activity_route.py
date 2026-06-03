@@ -1,3 +1,9 @@
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+
+from database.connection import get_db
+from database.models import ActivityPrediction
+
 from typing import List
 
 from fastapi import APIRouter, HTTPException
@@ -76,18 +82,72 @@ def get_classes():
     }
 
 
+@router.get("/prediction-history")
+def get_prediction_history(db: Session = Depends(get_db)):
+    records = (
+        db.query(ActivityPrediction)
+        .order_by(ActivityPrediction.created_at.desc())
+        .all()
+    )
+
+    return {
+        "success": True,
+        "message": "Prediction history retrieved successfully",
+        "data": [
+            {
+                "id": record.id,
+                "bitdepth": record.bitdepth,
+                "md": record.md,
+                "Hookload": record.Hookload,
+                "mudflowin": record.mudflowin,
+                "rpm": record.rpm,
+                "torqa": record.torqa,
+                "woba": record.woba,
+                "blockpos": record.blockpos,
+                "prediction_code": record.prediction_code,
+                "prediction_label": record.prediction_label,
+                "confidence": record.confidence,
+                "confidence_level": record.confidence_level,
+                "probabilities": record.probabilities,
+                "rule_signals": record.rule_signals,
+                "created_at": record.created_at
+            }
+            for record in records
+        ]
+    }
+
+
 @router.post("/predict")
-def predict_activity(data: ActivityInput):
+def predict_activity(data: ActivityInput, db: Session = Depends(get_db)):
     try:
-        result = predict_activity_service(data.model_dump())
+        input_dict = data.model_dump()
+        result = predict_activity_service(input_dict)
+
+        prediction_record = ActivityPrediction(
+            **input_dict,
+            prediction_code=result["prediction_code"],
+            prediction_label=result["prediction_label"],
+            confidence=result["confidence"],
+            confidence_level=result["confidence_level"],
+            probabilities=result["probabilities"],
+            rule_signals=result["rule_signals"]
+        )
+
+        db.add(prediction_record)
+        db.commit()
+        db.refresh(prediction_record)
 
         return {
             "success": True,
-            "message": "Prediction successful",
-            "data": result
+            "message": "Prediction successful and saved to database",
+            "data": {
+                "id": prediction_record.id,
+                **result
+            }
         }
 
     except Exception as error:
+        db.rollback()
         raise HTTPException(
             status_code=500,
             detail={

@@ -1,3 +1,5 @@
+from database.connection import engine, Base
+from database import models
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.activity_route import router as activity_router
@@ -7,6 +9,8 @@ app = FastAPI(
     description="API untuk prediksi activity drilling menggunakan Random Forest",
     version="1.0.0"
 )
+
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
