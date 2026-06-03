@@ -1,0 +1,23 @@
+{
+    "classes": [
+        "Rotary Drilling",
+        "Slide Drilling",
+        "Reaming",
+        "Connection",
+        "Other"
+    ],
+    "class_to_idx": {
+        "Rotary Drilling": 0,
+        "Slide Drilling": 1,
+        "Reaming": 2,
+        "Connection": 3,
+        "Other": 4
+    },
+    "idx_to_class": {
+        "0": "Rotary Drilling",
+        "1": "Slide Drilling",
+        "2": "Reaming",
+        "3": "Connection",
+        "4": "Other"
+    }
+}
