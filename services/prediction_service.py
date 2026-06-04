@@ -1,8 +1,9 @@
+import numpy as np
 import pandas as pd
 
 from core.loader import (
     model,
-    scaler,
+    onnx_input_name,
     feature_columns,
     inverse_class_mapping,
     feature_engineering
@@ -19,29 +20,53 @@ def get_confidence_level(confidence: float) -> str:
     return "Low"
 
 
+def normalize_probability_output(probability_raw):
+    if isinstance(probability_raw, dict):
+        return {
+            int(class_code): float(probability)
+            for class_code, probability in probability_raw.items()
+        }
+
+    probability_array = np.array(probability_raw)
+
+    return {
+        i: float(probability_array[i])
+        for i in range(len(probability_array))
+    }
+
+
 def predict_activity_service(input_data: dict) -> dict:
     input_df = pd.DataFrame([input_data])
 
-    X_scaled, processed_df = feature_engineering.preprocess_drilling_activity(
+    X_raw, processed_df = feature_engineering.preprocess_drilling_activity(
         input_df,
-        scaler,
         feature_columns
     )
 
-    prediction = model.predict(X_scaled)[0]
-    probability = model.predict_proba(X_scaled)[0]
+    X_input = X_raw.to_numpy(dtype=np.float32)
 
-    prediction_code = int(prediction)
+    outputs = model.run(
+        None,
+        {
+            onnx_input_name: X_input
+        }
+    )
+
+    prediction_code = int(outputs[0][0])
+
+    probability_raw = outputs[1][0]
+    probability_dict = normalize_probability_output(probability_raw)
+
     prediction_label = inverse_class_mapping.get(
         prediction_code,
         str(prediction_code)
     )
 
-    confidence = float(max(probability))
+    confidence = float(max(probability_dict.values()))
 
     probabilities = {
-        inverse_class_mapping.get(i, str(i)): float(probability[i])
-        for i in range(len(probability))
+        inverse_class_mapping.get(int(class_code), str(class_code)): float(probability)
+        for class_code, probability in probability_dict.items()
     }
 
     rule_signals = {

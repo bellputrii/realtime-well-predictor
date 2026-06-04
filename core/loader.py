@@ -1,11 +1,10 @@
 import json
-import joblib
 import importlib.util
+import onnxruntime as ort
 from pathlib import Path
 
 from core.config import (
     MODEL_PATH,
-    SCALER_PATH,
     FEATURE_COLUMNS_PATH,
     CLASS_MAPPING_PATH,
     FEATURE_ENGINEERING_PATH
@@ -57,8 +56,10 @@ def load_feature_engineering_module(path: Path):
     return module
 
 
-model = joblib.load(MODEL_PATH)
-scaler = joblib.load(SCALER_PATH)
+model = ort.InferenceSession(str(MODEL_PATH))
+
+onnx_input_name = model.get_inputs()[0].name
+onnx_output_names = [output.name for output in model.get_outputs()]
 
 feature_columns = load_json(FEATURE_COLUMNS_PATH)
 class_mapping = load_json(CLASS_MAPPING_PATH)

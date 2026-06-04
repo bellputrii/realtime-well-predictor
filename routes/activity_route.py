@@ -1,12 +1,10 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from database.connection import get_db
 from database.models import ActivityPrediction
-
-from typing import List
-
-from fastapi import APIRouter, HTTPException
 
 from schemas.activity_schema import ActivityInput
 from services.prediction_service import (
@@ -27,7 +25,7 @@ def home():
         "success": True,
         "message": "Activity Classifier API is running",
         "data": {
-            "model": "Random Forest",
+            "model": "Random Forest ONNX",
             "endpoint": "/predict",
             "docs": "/docs"
         }
@@ -51,7 +49,7 @@ def model_info():
         "success": True,
         "message": "Model information retrieved successfully",
         "data": {
-            "model": "Random Forest",
+            "model": "Random Forest ONNX",
             "total_features": len(feature_columns),
             "features": feature_columns,
             "classes": inverse_class_mapping
@@ -159,7 +157,7 @@ def predict_activity(data: ActivityInput, db: Session = Depends(get_db)):
 
 
 @router.post("/predict-batch")
-def predict_batch(data: List[ActivityInput]):
+def predict_batch(data: List[ActivityInput], db: Session = Depends(get_db)):
     try:
         input_items = [
             item.model_dump()
@@ -168,16 +166,40 @@ def predict_batch(data: List[ActivityInput]):
 
         results = predict_batch_service(input_items)
 
+        saved_results = []
+
+        for input_dict, result in zip(input_items, results):
+            prediction_record = ActivityPrediction(
+                **input_dict,
+                prediction_code=result["prediction_code"],
+                prediction_label=result["prediction_label"],
+                confidence=result["confidence"],
+                confidence_level=result["confidence_level"],
+                probabilities=result["probabilities"],
+                rule_signals=result["rule_signals"]
+            )
+
+            db.add(prediction_record)
+            db.flush()
+
+            saved_results.append({
+                "id": prediction_record.id,
+                **result
+            })
+
+        db.commit()
+
         return {
             "success": True,
-            "message": "Batch prediction successful",
+            "message": "Batch prediction successful and saved to database",
             "data": {
-                "total_rows": len(results),
-                "results": results
+                "total_rows": len(saved_results),
+                "results": saved_results
             }
         }
 
     except Exception as error:
+        db.rollback()
         raise HTTPException(
             status_code=500,
             detail={

@@ -1,3 +1,4 @@
+
 import pandas as pd
 
 NUMERIC_COLS = [
@@ -6,7 +7,7 @@ NUMERIC_COLS = [
 ]
 
 
-def preprocess_drilling_activity(df, scaler, feature_cols):
+def preprocess_drilling_activity(df, feature_cols):
     df = df.copy()
     df[NUMERIC_COLS] = df[NUMERIC_COLS].astype(float)
 
@@ -26,6 +27,5 @@ def preprocess_drilling_activity(df, scaler, feature_cols):
     df = df.dropna(subset=feature_cols).reset_index(drop=True)
 
     X_raw = df[feature_cols]
-    X_scaled = scaler.transform(X_raw)
 
-    return X_scaled, df
+    return X_raw, df

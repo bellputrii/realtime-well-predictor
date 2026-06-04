@@ -1,10 +1,7 @@
 fastapi
 uvicorn
+sqlalchemy
+pydantic
 pandas
 numpy
-scikit-learn
-joblib
-pydantic
-sqlalchemy
-pymysql
-python-dotenv
+onnxruntime
