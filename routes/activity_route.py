@@ -42,41 +42,41 @@ def health_check():
     }
 
 
-@router.get("/model-info")
-def model_info():
-    return {
-        "success": True,
-        "message": "Model information retrieved successfully",
-        "data": {
-            "model": "Random Forest ONNX",
-            "total_features": len(feature_columns),
-            "features": feature_columns,
-            "classes": inverse_class_mapping
-        }
-    }
+# @router.get("/model-info")
+# def model_info():
+#     return {
+#         "success": True,
+#         "message": "Model information retrieved successfully",
+#         "data": {
+#             "model": "Random Forest ONNX",
+#             "total_features": len(feature_columns),
+#             "features": feature_columns,
+#             "classes": inverse_class_mapping
+#         }
+#     }
 
 
-@router.get("/features")
-def get_features():
-    return {
-        "success": True,
-        "message": "Feature columns retrieved successfully",
-        "data": {
-            "total_features": len(feature_columns),
-            "feature_columns": feature_columns
-        }
-    }
+# @router.get("/features")
+# def get_features():
+#     return {
+#         "success": True,
+#         "message": "Feature columns retrieved successfully",
+#         "data": {
+#             "total_features": len(feature_columns),
+#             "feature_columns": feature_columns
+#         }
+#     }
 
 
-@router.get("/classes")
-def get_classes():
-    return {
-        "success": True,
-        "message": "Classes retrieved successfully",
-        "data": {
-            "classes": inverse_class_mapping
-        }
-    }
+# @router.get("/classes")
+# def get_classes():
+#     return {
+#         "success": True,
+#         "message": "Classes retrieved successfully",
+#         "data": {
+#             "classes": inverse_class_mapping
+#         }
+#     }
 
 
 @router.get("/prediction-history")
@@ -104,9 +104,9 @@ def get_prediction_history(db: Session = Depends(get_db)):
                 "prediction_code": record.prediction_code,
                 "prediction_label": record.prediction_label,
                 "confidence": record.confidence,
-                "confidence_level": record.confidence_level,
-                "probabilities": record.probabilities,
-                "rule_signals": record.rule_signals,
+                # "confidence_level": record.confidence_level,
+                # "probabilities": record.probabilities,
+                # "rule_signals": record.rule_signals,
                 "created_at": record.created_at
             }
             for record in records
@@ -286,5 +286,47 @@ def predict_batch(data: List[ActivityInput], db: Session = Depends(get_db)):
                 "success": False,
                 "message": "Batch prediction failed",
                 "error": str(error)
+            }
+        )
+    
+    
+@router.get("/latest-scheduler-results")
+def latest_scheduler_results(limit: int = 10, db: Session = Depends(get_db)):
+    """
+    Mengembalikan hasil prediksi terbaru dari scheduler.
+    limit = jumlah record terbaru yang ingin ditampilkan
+    Response minimal: id, prediction_code, prediction_label, confidence
+    """
+    try:
+        records = (
+            db.query(ActivityPrediction)
+            .order_by(ActivityPrediction.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+        results = [
+            {
+                "id": record.id,
+                "prediction_code": record.prediction_code,
+                "prediction_label": record.prediction_label,
+                "confidence": record.confidence
+            }
+            for record in records
+        ]
+
+        return {
+            "success": True,
+            "message": f"{len(results)} latest scheduler predictions retrieved",
+            "data": results
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "message": "Failed to retrieve latest scheduler results",
+                "error": str(e)
             }
         )
