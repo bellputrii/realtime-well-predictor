@@ -18,7 +18,6 @@ from core.loader import (
 
 router = APIRouter()
 
-
 @router.get("/")
 def home():
     return {
@@ -115,33 +114,71 @@ def get_prediction_history(db: Session = Depends(get_db)):
     }
 
 
+# @router.post("/predict")
+# def predict_activity(data: ActivityInput, db: Session = Depends(get_db)):
+#     try:
+#         input_dict = data.model_dump()
+#         result = predict_activity_service(input_dict)
+
+#         prediction_record = ActivityPrediction(
+#             **input_dict,
+#             prediction_code=result["prediction_code"],
+#             prediction_label=result["prediction_label"],
+#             confidence=result["confidence"],
+#             confidence_level=result["confidence_level"],
+#             probabilities=result["probabilities"],
+#             rule_signals=result["rule_signals"]
+#         )
+
+#         db.add(prediction_record)
+#         db.commit()
+#         db.refresh(prediction_record)
+
+#         return {
+#             "success": True,
+#             "message": "Prediction successful and saved to database",
+#             "data": {
+#                 "id": prediction_record.id,
+#                 **result
+#             }
+#         }
+
+#     except Exception as error:
+#         db.rollback()
+#         raise HTTPException(
+#             status_code=500,
+#             detail={
+#                 "success": False,
+#                 "message": "Prediction failed",
+#                 "error": str(error)
+#             }
+#         )
+
 @router.post("/predict")
 def predict_activity(data: ActivityInput, db: Session = Depends(get_db)):
     try:
         input_dict = data.model_dump()
         result = predict_activity_service(input_dict)
 
+        # Simpan ke DB (SQLite/MySQL)
         prediction_record = ActivityPrediction(
             **input_dict,
             prediction_code=result["prediction_code"],
             prediction_label=result["prediction_label"],
             confidence=result["confidence"],
-            confidence_level=result["confidence_level"],
-            probabilities=result["probabilities"],
-            rule_signals=result["rule_signals"]
+            confidence_level=result["confidence_level"]  # wajib untuk NOT NULL
         )
 
         db.add(prediction_record)
         db.commit()
         db.refresh(prediction_record)
 
+        # Response minimal
         return {
-            "success": True,
-            "message": "Prediction successful and saved to database",
-            "data": {
-                "id": prediction_record.id,
-                **result
-            }
+            "id": prediction_record.id,
+            "prediction_code": result["prediction_code"],
+            "prediction_label": result["prediction_label"],
+            "confidence": result["confidence"]
         }
 
     except Exception as error:
@@ -156,16 +193,64 @@ def predict_activity(data: ActivityInput, db: Session = Depends(get_db)):
         )
 
 
+# @router.post("/predict-batch")
+# def predict_batch(data: List[ActivityInput], db: Session = Depends(get_db)):
+#     try:
+#         input_items = [
+#             item.model_dump()
+#             for item in data
+#         ]
+
+#         results = predict_batch_service(input_items)
+
+#         saved_results = []
+
+#         for input_dict, result in zip(input_items, results):
+#             prediction_record = ActivityPrediction(
+#                 **input_dict,
+#                 prediction_code=result["prediction_code"],
+#                 prediction_label=result["prediction_label"],
+#                 confidence=result["confidence"],
+#                 confidence_level=result["confidence_level"],
+#                 probabilities=result["probabilities"],
+#                 rule_signals=result["rule_signals"]
+#             )
+
+#             db.add(prediction_record)
+#             db.flush()
+
+#             saved_results.append({
+#                 "id": prediction_record.id,
+#                 **result
+#             })
+
+#         db.commit()
+
+#         return {
+#             "success": True,
+#             "message": "Batch prediction successful and saved to database",
+#             "data": {
+#                 "total_rows": len(saved_results),
+#                 "results": saved_results
+#             }
+#         }
+
+#     except Exception as error:
+#         db.rollback()
+#         raise HTTPException(
+#             status_code=500,
+#             detail={
+#                 "success": False,
+#                 "message": "Batch prediction failed",
+#                 "error": str(error)
+#             }
+#         )
+
 @router.post("/predict-batch")
 def predict_batch(data: List[ActivityInput], db: Session = Depends(get_db)):
     try:
-        input_items = [
-            item.model_dump()
-            for item in data
-        ]
-
+        input_items = [item.model_dump() for item in data]
         results = predict_batch_service(input_items)
-
         saved_results = []
 
         for input_dict, result in zip(input_items, results):
@@ -174,28 +259,23 @@ def predict_batch(data: List[ActivityInput], db: Session = Depends(get_db)):
                 prediction_code=result["prediction_code"],
                 prediction_label=result["prediction_label"],
                 confidence=result["confidence"],
-                confidence_level=result["confidence_level"],
-                probabilities=result["probabilities"],
-                rule_signals=result["rule_signals"]
+                confidence_level=result["confidence_level"]
             )
-
             db.add(prediction_record)
             db.flush()
 
             saved_results.append({
                 "id": prediction_record.id,
-                **result
+                "prediction_code": result["prediction_code"],
+                "prediction_label": result["prediction_label"],
+                "confidence": result["confidence"]
             })
 
         db.commit()
 
         return {
-            "success": True,
-            "message": "Batch prediction successful and saved to database",
-            "data": {
-                "total_rows": len(saved_results),
-                "results": saved_results
-            }
+            "total_rows": len(saved_results),
+            "results": saved_results
         }
 
     except Exception as error:
