@@ -61,7 +61,6 @@ def get_scheduler():
         #     db.close()
 
         # Simpan ke DB
-        
         db = SessionLocal()
 
         try:
@@ -83,21 +82,24 @@ def get_scheduler():
                     record = ActivityPrediction(**record_data)
                     db.add(record)
 
+                    # ==========================================
+                    # DETAIL PREDICTION LOG
+                    # ==========================================
                     print(
                         f"""
-                        --------------------------------------------------
-                        Prediction #{idx}
-                        MD         : {input_dict['md']}
-                        Bit Depth  : {input_dict['bitdepth']}
-                        Hookload   : {input_dict['Hookload']}
-                        RPM        : {input_dict['rpm']}
-                        WOB        : {input_dict['woba']}
+        --------------------------------------------------
+        Prediction #{idx}
+        MD         : {input_dict['md']}
+        Bit Depth  : {input_dict['bitdepth']}
+        Hookload   : {input_dict['Hookload']}
+        RPM        : {input_dict['rpm']}
+        WOB        : {input_dict['woba']}
 
-                        Prediction : {result['prediction_label']}
-                        Code       : {result['prediction_code']}
-                        Confidence : {result['confidence']:.4f}
-                        --------------------------------------------------
-                        """
+        Prediction : {result['prediction_label']}
+        Code       : {result['prediction_code']}
+        Confidence : {result['confidence']:.4f}
+        --------------------------------------------------
+        """
                     )
 
                 except Exception as e:
@@ -105,6 +107,9 @@ def get_scheduler():
 
             db.commit()
 
+            # ==========================================
+            # SUMMARY
+            # ==========================================
             total_records = db.query(ActivityPrediction).count()
 
             print("\n" + "=" * 60)
