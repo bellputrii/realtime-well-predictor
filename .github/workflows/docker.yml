@@ -1,27 +1,20 @@
 name: Docker Build Test
 
 on:
-push:
-branches:
-- main
+  push:
+    branches:
+      - main
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-```
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  - name: Set Up Docker Buildx
-    uses: docker/setup-buildx-action@v3
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  - name: Build Docker Image
-    run: |
-      docker build -t drilling-activity-api .
-
-  - name: Run Docker Container
-    run: |
-      docker run -d -p 8000:8000 --name drilling-activity-api-container drilling-activity-api 
-```
+      - name: Build Docker Image
+        run: docker build -t drilling-activity-api .
