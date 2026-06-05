@@ -11,14 +11,14 @@ COPY . /app
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create non-root user
-RUN useradd -m appuser && chown -R appuser:appuser /app
+# # Create non-root user
+# RUN useradd -m appuser && chown -R appuser:appuser /app
 
-# Expose port FastAPI
-EXPOSE 8000
+# # Expose port FastAPI
+# EXPOSE 8000
 
-# Run as non-root user
-USER appuser
+# # Run as non-root user
+# USER appuser
 
 # Command untuk jalankan FastAPI
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
