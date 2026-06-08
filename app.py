@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.activity_route import router as activity_router
 
 # Import scheduler
+from scheduler.casing_scheduler import get_casing_scheduler
 from scheduler.drilling_scheduler import get_scheduler
 
 app = FastAPI(
@@ -26,11 +27,11 @@ app.add_middleware(
 
 app.include_router(activity_router)
 
-# ===============================
-# Jalankan scheduler saat startup
-# ===============================
+
 scheduler = get_scheduler()
+casing_scheduler = get_casing_scheduler()
 
 @app.on_event("startup")
 async def start_scheduler():
     scheduler.start()
+    casing_scheduler.start()

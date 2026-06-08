@@ -1,0 +1,20 @@
+{
+    "classes": [
+        "Circulation",
+        "Moving",
+        "Connection",
+        "Other"
+    ],
+    "class_to_idx": {
+        "Circulation": 0,
+        "Moving": 1,
+        "Connection": 2,
+        "Other": 3
+    },
+    "idx_to_class": {
+        "0": "Circulation",
+        "1": "Moving",
+        "2": "Connection",
+        "3": "Other"
+    }
+}

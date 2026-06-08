@@ -1,0 +1,52 @@
+ [
+    {
+      "blockpos": 14.05,
+      "bitdepth": 524.79,
+      "md": 872.01,
+      "hklda": 111.01,
+      "mudflowin": 0,
+      "speeddown": 7,
+      "speedup": 0,
+      "stppress": 0
+    },
+    {
+      "blockpos": 13.4,
+      "bitdepth": 525.44,
+      "md": 872.01,
+      "hklda": 96.38,
+      "mudflowin": 0,
+      "speeddown": 6,
+      "speedup": 0,
+      "stppress": 0
+    },
+    {
+      "blockpos": 12.88,
+      "bitdepth": 525.96,
+      "md": 872.01,
+      "hklda": 96.34,
+      "mudflowin": 0,
+      "speeddown": 6,
+      "speedup": 0,
+      "stppress": 0
+    },
+    {
+      "blockpos": 12.34,
+      "bitdepth": 526.51,
+      "md": 872.01,
+      "hklda": 96.29,
+      "mudflowin": 0,
+      "speeddown": 7,
+      "speedup": 0,
+      "stppress": 0
+    },
+    {
+      "blockpos": 11.76,
+      "bitdepth": 527.09,
+      "md": 872.01,
+      "hklda": 96.06,
+      "mudflowin": 0,
+      "speeddown": 7,
+      "speedup": 0,
+      "stppress": 0
+    }
+  ]

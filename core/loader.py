@@ -4,10 +4,14 @@ import onnxruntime as ort
 from pathlib import Path
 
 from core.config import (
+    FEATURE_ENGINEERING_CASING_PATH,
     MODEL_PATH,
     FEATURE_COLUMNS_PATH,
     CLASS_MAPPING_PATH,
-    FEATURE_ENGINEERING_PATH
+    FEATURE_ENGINEERING_PATH,
+    MODEL_CASING_PATH,
+    FEATURE_COLUMNS_CASING_PATH,
+    CLASS_MAPPING_CASING_PATH
 )
 
 
@@ -55,7 +59,7 @@ def load_feature_engineering_module(path: Path):
 
     return module
 
-
+# ACTIVITY CLASSIFIER
 model = ort.InferenceSession(str(MODEL_PATH))
 
 onnx_input_name = model.get_inputs()[0].name
@@ -68,4 +72,19 @@ inverse_class_mapping = build_inverse_class_mapping(class_mapping)
 
 feature_engineering = load_feature_engineering_module(
     FEATURE_ENGINEERING_PATH
+)
+
+# CASING TRIP CLASSIFIER
+model_casing = ort.InferenceSession(str(MODEL_CASING_PATH))
+
+onnx_input_name_casing = model_casing.get_inputs()[0].name
+onnx_output_names_casing = [output.name for output in model_casing.get_outputs()]
+
+feature_columns_casing = load_json(FEATURE_COLUMNS_CASING_PATH)
+class_mapping_casing = load_json(CLASS_MAPPING_CASING_PATH)
+
+inverse_class_mapping_casing = build_inverse_class_mapping(class_mapping_casing)
+
+feature_engineering_casing = load_feature_engineering_module(
+    FEATURE_ENGINEERING_CASING_PATH
 )
