@@ -1,0 +1,54 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.env.*
+*.egg-info/
+*.eggs/
+*.pytest_cache/
+*.coverage
+*.cover
+*.hypothesis/
+*.mypy_cache/
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# =====================
+# Artifacts & Models
+# =====================
+artifacts/
+artifacts-ct/
+*.onnx
+*.pkl
+*.joblib
+*.json
+*.db
+
+# =====================
+# IDE / Editor
+# =====================
+.vscode/
+.idea/
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# =====================
+# Logs
+# =====================
+*.log
+logs/
+
+# =====================
+# OS generated
+# =====================
+Thumbs.db
+Desktop.ini
