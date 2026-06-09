@@ -23,7 +23,7 @@ class WellFetchInput(BaseModel):
 # Activity POST endpoint
 # -------------------
 @router.post("/predict-activity-api")
-async def predict_activity_manual(
+async def predict_activity_api(
     input_data: WellFetchInput,
     db: Session = Depends(get_db)
 ):
@@ -74,7 +74,7 @@ async def predict_activity_manual(
 # Casing POST endpoint
 # -------------------
 @router.post("/predict-casing-api")
-async def predict_casing_manual(
+async def predict_casing_api(
     input_data: WellFetchInput,
     db: Session = Depends(get_db)
 ):
